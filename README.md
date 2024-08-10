@@ -1,0 +1,2 @@
+# CampoRate
+Rate your campus
