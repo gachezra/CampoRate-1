@@ -37,10 +37,10 @@ const Header = () => {
           <FaBars size={24} />
         </button>
       </div>
-      <nav className={`md:flex md:items-center ${isMenuOpen ? 'block' : 'hidden'} md:block`}>
+      <div className="relative flex items-center">
         <div className="relative my-4 md:my-0 md:mr-4">
           <input
-            className="w-full md:w-48 px-3 py-2 rounded-full focus:md:w-55 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out"
+            className="w-32 md:w-48 px-3 py-2 rounded-full focus:md:w-64 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out"
             type="text"
             placeholder="Search Campus..."
           />
@@ -48,7 +48,7 @@ const Header = () => {
             <FaSearch />
           </div>
         </div>
-        <div className="flex flex-col md:flex-row md:items-center">
+        <nav className="hidden md:flex md:items-center">
           <Link to="/contact" className="block text-gray-700 hover:text-c3a287 md:mr-4 my-2 md:my-0">
             Contact
           </Link>
@@ -82,8 +82,45 @@ const Header = () => {
               {isRegisterFormOpen && <RegisterForm onClose={() => setIsRegisterFormOpen(false)} />}
             </>
           )}
-        </div>
-      </nav>
+        </nav>
+      </div>
+
+      {/* Separate Hamburger Menu */}
+      <div className={`absolute top-16 left-0 w-full bg-[#ebcfb2] shadow-md z-10 p-4 ${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+        <Link to="/contact" className="block text-gray-700 hover:text-c3a287 my-2">
+          Contact
+        </Link>
+        {isLoggedIn ? (
+          <>
+            <Link to="/profile" className="block text-gray-700 hover:text-c3a287 my-2">
+              <CgProfile size={24} title="Profile" />
+            </Link>
+            <button
+              className="block text-gray-700 hover:text-c3a287 my-2"
+              onClick={() => localStorage.removeItem('token')}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="block text-gray-700 hover:text-c3a287 my-2"
+              onClick={() => setIsLoginFormOpen(true)}
+            >
+              Login
+            </button>
+            {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} />}
+            <button
+              className="block text-gray-700 hover:text-c3a287 my-2"
+              onClick={() => setIsRegisterFormOpen(true)}
+            >
+              Register
+            </button>
+            {isRegisterFormOpen && <RegisterForm onClose={() => setIsRegisterFormOpen(false)} />}
+          </>
+        )}
+      </div>
     </header>
   );
 };

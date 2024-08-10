@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { login } from '../utils/APIRoutes';
+import { loginRoute } from '../utils/APIRoutes';
+import axios from 'axios';
 
-const LoginForm = ({ onClose, onLogin }) => {
+const LoginForm = ({ onClose }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,9 +15,13 @@ const LoginForm = ({ onClose, onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = await login(formData);
-      localStorage.setItem('token', token);
-      onLogin();
+      const response = await axios.post(loginRoute,{
+        email: formData.email,
+        password: formData.password
+      })
+      console.log(response.data)
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('uid', response.data.id)
       onClose();
     } catch (error) {
       console.error('Error logging in:', error);
@@ -30,7 +35,7 @@ const LoginForm = ({ onClose, onLogin }) => {
         <form onSubmit={handleSubmit} className="flex flex-col">
           <label className="text-light-brown mb-1">Email:</label>
           <input
-            type="email"
+            type="text"
             name="email"
             value={formData.email}
             onChange={handleChange}

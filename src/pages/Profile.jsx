@@ -1,22 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import EditProfileForm from '../components/EditProfileForm';
 import { getUserProfile } from '../utils/APIRoutes';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Profile = () => {
+  const userId = localStorage.getItem('uid');
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      if (!token) {
+        console.error('No token found, redirecting to login.');
+        navigate('/login'); // Redirect to login page if no token is found
+        return;
+      }
+
       try {
-        const userData = await getUserProfile();
-        setUser(userData);
+        console.log(`User ID: ${userId}, User token: ${token}`)
+        const response = await axios.get(getUserProfile, {
+          userId: userId
+        });
+        console.error(response)
+        if (response.status === 200){
+          setUser(response.data);
+        } else {
+          console.error(response.error)
+        }
       } catch (error) {
         console.error('Error fetching user profile:', error);
+        // Handle token expiration or invalid token cases by redirecting to login
+        if (error.response && error.response.status === 401) {
+          console.error('Token expired or invalid, redirecting to login.');
+          navigate('/login');
+        }
       }
     };
+
     fetchUserProfile();
-  }, []);
+  }, [userId, token, navigate]);
 
   if (!user) return <div>Loading...</div>;
 

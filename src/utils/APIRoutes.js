@@ -1,36 +1,23 @@
-const API_BASE_URL = 'http://localhost:27680/api'; // Replace with your actual API base URL
+const API_BASE_URL = 'https://0d98-41-90-37-74.ngrok-free.app/api';
+
+// auth routes
+export const registerRoute = `${API_BASE_URL}/register`
+export const loginRoute = `${API_BASE_URL}/login`
+
+//profile
+export const getUserProfile = `${API_BASE_URL}/profile`
+
 
 const headers = () => ({
   'Content-Type': 'application/json',
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
 });
 
-export const register = async (userData) => {
-  const response = await fetch(`${API_BASE_URL}/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  });
-  if (!response.ok) throw new Error('Registration failed');
-  return response.json();
-};
-
-export const login = async (credentials) => {
-  const response = await fetch(`${API_BASE_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
-  });
-  if (!response.ok) throw new Error('Login failed');
-  const data = await response.json();
-  return data.token;
-};
-
-export const getUserProfile = async () => {
-  const response = await fetch(`${API_BASE_URL}/profile`, {
-    headers: headers(),
-  });
-  if (!response.ok) throw new Error('Failed to fetch user profile');
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`${errorData.message || response.statusText} (${response.status})`);
+  }
   return response.json();
 };
 
@@ -40,8 +27,7 @@ export const changePassword = async (currentPassword, newPassword) => {
     headers: headers(),
     body: JSON.stringify({ currentPassword, newPassword }),
   });
-  if (!response.ok) throw new Error('Password change failed');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const updateUserProfile = async (userData) => {
@@ -50,8 +36,7 @@ export const updateUserProfile = async (userData) => {
     headers: headers(),
     body: JSON.stringify(userData),
   });
-  if (!response.ok) throw new Error('Failed to update user profile');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const getUniversities = async (params = {}) => {
@@ -59,16 +44,14 @@ export const getUniversities = async (params = {}) => {
   const response = await fetch(`${API_BASE_URL}/universities?${queryString}`, {
     headers: headers(),
   });
-  if (!response.ok) throw new Error('Failed to fetch universities');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const getUniversityById = async (id) => {
   const response = await fetch(`${API_BASE_URL}/universities/${id}`, {
     headers: headers(),
   });
-  if (!response.ok) throw new Error('Failed to fetch university');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const addReview = async (universityId, reviewData) => {
@@ -77,16 +60,14 @@ export const addReview = async (universityId, reviewData) => {
     headers: headers(),
     body: JSON.stringify(reviewData),
   });
-  if (!response.ok) throw new Error('Failed to add review');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const getReviews = async () => {
   const response = await fetch(`${API_BASE_URL}/reviews`, {
     headers: headers(),
   });
-  if (!response.ok) throw new Error('Failed to fetch reviews');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const addSchoolEmail = async (schoolEmail) => {
@@ -95,14 +76,31 @@ export const addSchoolEmail = async (schoolEmail) => {
     headers: headers(),
     body: JSON.stringify({ schoolEmail }),
   });
-  if (!response.ok) throw new Error('Failed to add school email');
-  return response.json();
+  return handleResponse(response);
 };
 
 export const verifyEmail = async (token) => {
   const response = await fetch(`${API_BASE_URL}/verify-email/${token}`, {
-    headers: headers(),
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
   });
-  if (!response.ok) throw new Error('Email verification failed');
-  return response.json();
+  return handleResponse(response);
+};
+
+export const requestPasswordReset = async (email) => {
+  const response = await fetch(`${API_BASE_URL}/request-password-reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  return handleResponse(response);
+};
+
+export const resetPassword = async (token, newPassword) => {
+  const response = await fetch(`${API_BASE_URL}/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  return handleResponse(response);
 };

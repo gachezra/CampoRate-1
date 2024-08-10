@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { register } from '../utils/APIRoutes';
+import { registerRoute } from '../utils/APIRoutes';
+import axios from 'axios';
 
-const RegisterForm = ({ onClose, onRegister }) => {
+const RegisterForm = ({ onClose }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -16,13 +17,19 @@ const RegisterForm = ({ onClose, onRegister }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match");
+      alert("Passwords don't match"); 
       return;
     }
     try {
-      await register(formData);
-      onRegister();
-      onClose();
+      const response = await axios.post(registerRoute, {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log(response)
+
+      // onClose();
     } catch (error) {
       console.error('Error registering:', error);
     }
