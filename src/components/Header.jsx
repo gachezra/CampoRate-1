@@ -4,11 +4,13 @@ import { CgProfile } from "react-icons/cg";
 import { Link } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
+import PasswordResetForm from './PasswordResetForm';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginFormOpen, setIsLoginFormOpen] = useState(false);
   const [isRegisterFormOpen, setIsRegisterFormOpen] = useState(false);
+  const [isResetPasswordFormOpen, setIsResetPasswordFormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const Header = () => {
 
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-[#ebcfb2] shadow-md">
-      <div className="text-xl font-bold">CampusRank Ke</div>
+      <div className="text-xl font-bold"><Link to='/'>CampusRank Ke</Link></div>
       <div className="flex items-center md:hidden">
         <button onClick={toggleMenu} className="text-gray-700 hover:text-c3a287 focus:outline-none">
           <FaBars size={24} />
@@ -72,7 +74,8 @@ const Header = () => {
               >
                 Login
               </button>
-              {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} />}
+              {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} passwordReset={() => {setIsResetPasswordFormOpen(true)}} />}
+              {isResetPasswordFormOpen && <PasswordResetForm onClose={() => setIsResetPasswordFormOpen(false)}/>}
               <button
                 className="block text-gray-700 hover:text-c3a287 md:mr-4 my-2 md:my-0"
                 onClick={() => setIsRegisterFormOpen(true)}

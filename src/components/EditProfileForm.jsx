@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { updateUserProfile } from '../utils/APIRoutes';
+import { updateUserRoute } from '../utils/APIRoutes';
+import axios from 'axios';
 
 const EditProfileForm = ({ user, onClose, onUpdate }) => {
+  const userId = localStorage.getItem('uid');
+  const token = localStorage.getItem('token');
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
@@ -15,7 +18,14 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedUser = await updateUserProfile(formData);
+      const updatedUser = await axios.post(`${updateUserRoute}/${userId}`, {
+        username: formData.username,
+        email: formData.email
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       onUpdate(updatedUser);
       onClose();
     } catch (error) {

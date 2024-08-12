@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import EditProfileForm from '../components/EditProfileForm';
-import { getUserProfile } from '../utils/APIRoutes';
+import { getUserProfileRoute } from '../utils/APIRoutes';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import UniversityCard from '../components/UniversityCard';
+import universities from '../data/universities';
+import UniversityForm from '../components/Universityform';
 
 const Profile = () => {
   const userId = localStorage.getItem('uid');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isUniversityFormOpen, setIsUniversityFormOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -21,10 +25,11 @@ const Profile = () => {
 
       try {
         console.log(`User ID: ${userId}, User token: ${token}`)
-        const response = await axios.get(getUserProfile, {
-          userId: userId
+        const response = await axios.get(`${getUserProfileRoute}/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          }
         });
-        console.error(response)
         if (response.status === 200){
           setUser(response.data);
         } else {
@@ -73,6 +78,12 @@ const Profile = () => {
         >
           Edit Profile
         </button>
+        <button 
+          className="bg-light-brown hover:bg-light-brown-dark text-cream py-2 px-4 rounded mt-2"
+          onClick={() => setIsUniversityFormOpen(true)}
+        >
+          Add University
+        </button>
       </div>
       {isEditFormOpen && (
         <EditProfileForm
@@ -81,6 +92,20 @@ const Profile = () => {
           onUpdate={setUser}
         />
       )}
+      {isUniversityFormOpen && (
+        <UniversityForm
+          user={user}
+          onClose={() => setIsUniversityFormOpen(false)}
+          onUpdate={setUser}
+        />
+      )}
+      {universities.map(university => (
+        <UniversityCard 
+          key={university.id}
+          university={university}
+          isProfile={true}
+        />
+      ))}
     </div>
   );
 };
