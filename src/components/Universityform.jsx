@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getUniversityNamesRoute, schoolEmailRoute } from '../utils/APIRoutes';
+import { getUniversityNamesRoute, schoolEmailRoute, getProgramsRoute } from '../utils/APIRoutes';
 
 const UniversityForm = ({ onClose, onUniversityAdded }) => {
   const [universities, setUniversities] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [formData, setFormData] = useState({
     universityId: '',
+    program: '',
     schoolEmail: '',
   });
   const [notification, setNotification] = useState('');
@@ -15,7 +17,6 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
     const fetchUniversities = async () => {
       try {
         const response = await axios.get(getUniversityNamesRoute);
-        console.log('Universities: ', response.data)
         setUniversities(response.data);
       } catch (error) {
         console.error('Error fetching universities:', error);
@@ -26,8 +27,32 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
     fetchUniversities();
   }, []);
 
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      if (formData.universityId) {
+        try {
+          const response = await axios.get(`${getProgramsRoute}/${formData.universityId}`);
+          setPrograms(response.data);
+        } catch (error) {
+          console.error('Error fetching programs:', error);
+          setNotification('Failed to load programs. Please try again later.');
+        }
+      } else {
+        setPrograms([]);
+      }
+    };
+
+    fetchPrograms();
+  }, [formData.universityId]);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Reset the program selection when the university changes
+    if (name === 'universityId') {
+      setFormData((prev) => ({ ...prev, program: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -36,7 +61,11 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
     setNotification('');
 
     try {
-      const response = await axios.post(schoolEmailRoute, formData);
+      const response = await axios.post(schoolEmailRoute, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
       setNotification(response.data.message || 'University and email added successfully!');
       onUniversityAdded();
       onClose();
@@ -71,6 +100,24 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
               {universities.map((university) => (
                 <option key={university._id} value={university._id}>
                   {university.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[#A58A6F] mb-1">Select Program:</label>
+            <select
+              name="program"
+              value={formData.program}
+              onChange={handleChange}
+              required
+              disabled={!programs.length}
+              className="w-full px-3 py-2 border border-[#C3A287] rounded focus:outline-none focus:ring focus:ring-[#C3A287] transition duration-300"
+            >
+              <option value="">-- Select a Program --</option>
+              {programs.map((program, index) => (
+                <option key={index} value={program}>
+                  {program}
                 </option>
               ))}
             </select>

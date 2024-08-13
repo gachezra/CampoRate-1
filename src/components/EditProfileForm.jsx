@@ -8,7 +8,6 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
-    university: user.university ? user.university._id : '',
   });
 
   const handleChange = (e) => {
@@ -18,7 +17,8 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedUser = await axios.post(`${updateUserRoute}/${userId}`, {
+      console.log('User id: ', userId)
+      const updatedUser = await axios.put(`${updateUserRoute}/${userId}`, {
         username: formData.username,
         email: formData.email
       }, {
@@ -26,7 +26,12 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
           Authorization: `Bearer ${token}`
         }
       })
-      onUpdate(updatedUser);
+      const newUser = {
+        username: updatedUser.data.user.username,
+        email: updatedUser.data.user.email,
+        role: updatedUser.data.user.role
+      }
+      onUpdate(newUser);
       onClose();
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -54,14 +59,6 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="border border-light-brown rounded p-2 mb-4"
-          />
-          <label className="text-light-brown mb-1">University:</label>
-          <input
-            type="text"
-            name="university"
-            value={formData.university}
-            onChange={handleChange}
             className="border border-light-brown rounded p-2 mb-4"
           />
           <button

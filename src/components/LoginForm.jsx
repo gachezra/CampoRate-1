@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { loginRoute } from '../utils/APIRoutes';
 import axios from 'axios';
 
-const LoginForm = ({ onClose, passwordReset }) => {
+const LoginForm = ({ onClose, passwordReset, onLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,6 +22,7 @@ const LoginForm = ({ onClose, passwordReset }) => {
       console.log(response.data)
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('uid', response.data.id)
+      onLogin()
       onClose();
     } catch (error) {
       console.error('Error logging in:', error);

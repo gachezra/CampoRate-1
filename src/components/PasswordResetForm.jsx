@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { passwordResetRoute } from '../utils/APIRoutes';
+import { changePasswordRoute } from '../utils/APIRoutes';
 
 const PasswordResetForm = ({ onClose }) => {
   const [email, setEmail] = useState('');
@@ -13,7 +13,7 @@ const PasswordResetForm = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(passwordResetRoute, { email });
+      const response = await axios.post(changePasswordRoute, { email });
       console.log(response.data)
       setMessage('If the email is registered, a reset link will be sent.');
     } catch (error) {

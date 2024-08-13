@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import EditProfileForm from '../components/EditProfileForm';
-import { getUserProfileRoute } from '../utils/APIRoutes';
+import { getUserProfileRoute, getUniversityDetails } from '../utils/APIRoutes';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ReviewForm from '../components/ReviewForm';
 import UniversityCard from '../components/UniversityCard';
-import universities from '../data/universities';
 import UniversityForm from '../components/Universityform';
 
 const Profile = () => {
@@ -13,6 +13,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isUniversityFormOpen, setIsUniversityFormOpen] = useState(false);
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [universities, setUniversities] = useState([]);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -24,12 +27,12 @@ const Profile = () => {
       }
 
       try {
-        console.log(`User ID: ${userId}, User token: ${token}`)
         const response = await axios.get(`${getUserProfileRoute}/${userId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }
         });
+        console.log(response.data)
         if (response.status === 200){
           setUser(response.data);
         } else {
@@ -47,6 +50,36 @@ const Profile = () => {
 
     fetchUserProfile();
   }, [userId, token, navigate]);
+
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        const response = await axios.get(getUniversityDetails);
+        
+        // Extract the universities array from the response
+        const { universities } = response.data;
+
+        if (Array.isArray(universities)) {
+          // Filter universities where the userId matches one of the students
+          const filteredUniversities = universities.filter(university =>
+            university.students.includes(userId)
+          );
+          setUniversities(filteredUniversities);
+        } else {
+          console.error('Unexpected universities format:', universities);
+        }
+      } catch (error) {
+        console.error('Error fetching universities:', error);
+      }
+    };
+
+    fetchUniversities();
+  }, [userId]);
+
+  const handleReviewClick = (university) => {
+    setSelectedUniversity(university._id);
+    setIsReviewFormOpen(true);
+  };
 
   if (!user) return <div>Loading...</div>;
 
@@ -66,6 +99,10 @@ const Profile = () => {
           <span className="text-light-brown font-bold">Role:</span>
           <span className="text-brown ml-2">{user.role}</span>
         </div>
+        <div className="mb-2">
+          <span className="text-light-brown font-bold">Program(s):</span>
+          <span className="text-brown ml-2">{user.program}</span>
+        </div>
         {user.university && (
           <div className="mb-2">
             <span className="text-light-brown font-bold">University:</span>
@@ -79,7 +116,7 @@ const Profile = () => {
           Edit Profile
         </button>
         <button 
-          className="bg-light-brown hover:bg-light-brown-dark text-cream py-2 px-4 rounded mt-2"
+          className="bg-light-brown hover:bg-light-brown-dark text-cream py-2 px-4 rounded ml-3 mt-2"
           onClick={() => setIsUniversityFormOpen(true)}
         >
           Add University
@@ -101,11 +138,18 @@ const Profile = () => {
       )}
       {universities.map(university => (
         <UniversityCard 
-          key={university.id}
+          key={university._id}
           university={university}
+          onReviewClick={handleReviewClick}
           isProfile={true}
         />
       ))}
+      {isReviewFormOpen && (
+        <ReviewForm
+          universityId={selectedUniversity}
+          onClose={() => setIsReviewFormOpen(false)}
+        />
+      )}
     </div>
   );
 };

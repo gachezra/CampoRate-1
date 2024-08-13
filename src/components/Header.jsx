@@ -27,6 +27,12 @@ const Header = () => {
     };
   }, []);
 
+  const checkLoginStatus = () => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+    window.addEventListener('storage', checkLoginStatus);
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -34,13 +40,16 @@ const Header = () => {
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-[#ebcfb2] shadow-md">
       <div className="text-xl font-bold"><Link to='/'>CampusRank Ke</Link></div>
-      <div className="flex items-center md:hidden">
-        <button onClick={toggleMenu} className="text-gray-700 hover:text-c3a287 focus:outline-none">
+      
+      {/* Flex container for the middle section */}
+      <div className="flex items-center justify-end flex-grow md:hidden">
+        <button onClick={toggleMenu} className="text-gray-700 hover:text-c3a287 focus:outline-none ml-auto">
           <FaBars size={24} />
         </button>
       </div>
+      
       <div className="relative flex items-center">
-        <div className="relative my-4 md:my-0 md:mr-4">
+        <div className="relative my-4 md:my-0 md:mr-4 hidden md:block">
           <input
             className="w-32 md:w-48 px-3 py-2 rounded-full focus:md:w-64 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out"
             type="text"
@@ -74,7 +83,11 @@ const Header = () => {
               >
                 Login
               </button>
-              {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} passwordReset={() => {setIsResetPasswordFormOpen(true)}} />}
+              {isLoginFormOpen && <LoginForm 
+                onClose={() => setIsLoginFormOpen(false)}
+                passwordReset={() => {setIsResetPasswordFormOpen(true)}}
+                onLogin={checkLoginStatus()}
+              />}
               {isResetPasswordFormOpen && <PasswordResetForm onClose={() => setIsResetPasswordFormOpen(false)}/>}
               <button
                 className="block text-gray-700 hover:text-c3a287 md:mr-4 my-2 md:my-0"
@@ -123,6 +136,16 @@ const Header = () => {
             {isRegisterFormOpen && <RegisterForm onClose={() => setIsRegisterFormOpen(false)} />}
           </>
         )}
+        <div className="relative my-4 md:my-0 md:mr-4 md:hidden">
+          <input
+            className="w-full px-3 py-2 rounded-full focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out"
+            type="text"
+            placeholder="Search Campus..."
+          />
+          <div className="absolute top-0 right-0 flex items-center justify-center w-10 h-full text-gray-400">
+            <FaSearch />
+          </div>
+        </div>
       </div>
     </header>
   );
