@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { verifyEmailRoute } from '../utils/APIRoutes';
 import LoginForm from '../components/LoginForm';
 
 const EmailVerify = () => {
   const { verificationToken } = useParams();
+  const token = localStorage.getItem('token');
   const [isVerifying, setIsVerifying] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
-  const [isLoginFormOpen,setIsLoginFormOpen] = useState(false);
+  const [isLoginFormOpen, setIsLoginFormOpen] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -44,26 +45,48 @@ const EmailVerify = () => {
       ) : isVerified ? (
         <div className="flex flex-col items-center">
           <h2 className="text-2xl font-bold mb-4">Email Verified Successfully!</h2>
-          <p className="mb-4">Your email has been verified. You can now log in.</p>
-          <button
-            onClick={handleLoginRedirect}
-            className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
-          >
-            Go to Login
-          </button>
-          {isLoginFormOpen && <LoginForm onClose={() => {setIsLoginFormOpen(false)}}/> }
+          <p className="mb-4">Your email has been verified.</p>
+          {token ? (
+            <Link
+              to="/profile"
+              className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
+            >
+              Go to Profile
+            </Link>
+          ) : (
+            <>
+              <button
+                onClick={handleLoginRedirect}
+                className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
+              >
+                Go to Login
+              </button>
+              {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} />}
+            </>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center">
           <h2 className="text-2xl font-bold mb-4 text-red-500">Verification Failed</h2>
           <p className="mb-4">{error}</p>
-          <button
-            onClick={handleLoginRedirect}
-            className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
-          >
-            Go to Login
-          </button>
-          {isLoginFormOpen && <LoginForm onClose={() => {setIsLoginFormOpen(false)}}/> }
+          {token ? (
+            <Link
+              to="/profile"
+              className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
+            >
+              Go to Profile
+            </Link>
+          ) : (
+            <>
+              <button
+                onClick={handleLoginRedirect}
+                className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded transition-colors duration-300"
+              >
+                Go to Login
+              </button>
+              {isLoginFormOpen && <LoginForm onClose={() => setIsLoginFormOpen(false)} />}
+            </>
+          )}
         </div>
       )}
     </div>

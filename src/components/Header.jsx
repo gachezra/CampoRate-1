@@ -27,21 +27,25 @@ const Header = () => {
     };
   }, []);
 
-  const checkLoginStatus = () => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-    window.addEventListener('storage', checkLoginStatus);
+  const logout = () => {
+    localStorage.removeItem('uid');
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);  // This will trigger a re-render
+    setIsLoginFormOpen(false);
+  };
+
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-[#ebcfb2] shadow-md">
       <div className="text-xl font-bold"><Link to='/'>CampusRank Ke</Link></div>
       
-      {/* Flex container for the middle section */}
       <div className="flex items-center justify-end flex-grow md:hidden">
         <button onClick={toggleMenu} className="text-gray-700 hover:text-c3a287 focus:outline-none ml-auto">
           <FaBars size={24} />
@@ -70,7 +74,7 @@ const Header = () => {
               </Link>
               <button
                 className="block text-gray-700 hover:text-c3a287 md:mr-4 my-2 md:my-0"
-                onClick={() => localStorage.removeItem('token')}
+                onClick={logout}
               >
                 Logout
               </button>
@@ -86,7 +90,7 @@ const Header = () => {
               {isLoginFormOpen && <LoginForm 
                 onClose={() => setIsLoginFormOpen(false)}
                 passwordReset={() => {setIsResetPasswordFormOpen(true)}}
-                onLogin={checkLoginStatus()}
+                onLogin={handleLoginSuccess}
               />}
               {isResetPasswordFormOpen && <PasswordResetForm onClose={() => setIsResetPasswordFormOpen(false)}/>}
               <button
@@ -95,13 +99,12 @@ const Header = () => {
               >
                 Register
               </button>
-              {isRegisterFormOpen && <RegisterForm onClose={() => setIsRegisterFormOpen(false)} />}
+              {isRegisterFormOpen && <RegisterForm onClose={() => setIsRegisterFormOpen(false)}/>}
             </>
           )}
         </nav>
       </div>
 
-      {/* Separate Hamburger Menu */}
       <div className={`absolute top-16 left-0 w-full bg-[#ebcfb2] shadow-md z-10 p-4 ${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
         <Link to="/contact" className="block text-gray-700 hover:text-c3a287 my-2">
           Contact
@@ -113,7 +116,7 @@ const Header = () => {
             </Link>
             <button
               className="block text-gray-700 hover:text-c3a287 my-2"
-              onClick={() => localStorage.removeItem('token')}
+              onClick={logout}
             >
               Logout
             </button>

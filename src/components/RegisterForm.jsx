@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { registerRoute } from '../utils/APIRoutes';
 import axios from 'axios';
 
-const RegisterForm = ({ onClose }) => {
+const RegisterForm = ({ onClose, onRegister }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -29,7 +29,7 @@ const RegisterForm = ({ onClose }) => {
 
       console.log(response)
 
-      // onClose();
+      onClose();
     } catch (error) {
       console.error('Error registering:', error);
     }

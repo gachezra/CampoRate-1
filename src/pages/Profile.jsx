@@ -17,30 +17,30 @@ const Profile = () => {
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [universities, setUniversities] = useState([]);
   const [user, setUser] = useState(null);
+  const [verifiedPrograms, setVerifiedPrograms] = useState([]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!token) {
         console.error('No token found, redirecting to login.');
-        navigate('/login'); // Redirect to login page if no token is found
+        navigate('/login');
         return;
       }
 
       try {
         const response = await axios.get(`${getUserProfileRoute}/${userId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        console.log(response.data)
-        if (response.status === 200){
+
+        if (response.status === 200) {
           setUser(response.data);
         } else {
-          console.error(response.error)
+          console.error(response.error);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        // Handle token expiration or invalid token cases by redirecting to login
         if (error.response && error.response.status === 401) {
           console.error('Token expired or invalid, redirecting to login.');
           navigate('/login');
@@ -52,29 +52,36 @@ const Profile = () => {
   }, [userId, token, navigate]);
 
   useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const response = await axios.get(getUniversityDetails);
-        
-        // Extract the universities array from the response
-        const { universities } = response.data;
+    const fetchVerifiedUniversities = async () => {
+      if (user && user.universities) {
+        try {
+          const verifiedUniversities = [];
 
-        if (Array.isArray(universities)) {
-          // Filter universities where the userId matches one of the students
-          const filteredUniversities = universities.filter(university =>
-            university.students.includes(userId)
-          );
-          setUniversities(filteredUniversities);
-        } else {
-          console.error('Unexpected universities format:', universities);
+          for (let universityEntry of user.universities) {
+            if (universityEntry.isVerified) {
+              const response = await axios.get(`${getUniversityDetails}/${universityEntry.university}`);
+              if (response.status === 200) {
+                verifiedUniversities.push(response.data);
+              }
+            }
+          }
+
+          setUniversities(verifiedUniversities);
+
+          // Extract the programs of the verified universities
+          const verifiedProgramsList = user.universities
+            .filter(userUni => userUni.isVerified)
+            .map(userUni => userUni.program);
+
+            setVerifiedPrograms(verifiedProgramsList);
+        } catch (error) {
+          console.error('Error fetching universities:', error);
         }
-      } catch (error) {
-        console.error('Error fetching universities:', error);
       }
     };
 
-    fetchUniversities();
-  }, [userId]);
+    fetchVerifiedUniversities();
+  }, [user]);
 
   const handleReviewClick = (university) => {
     setSelectedUniversity(university._id);
@@ -101,21 +108,17 @@ const Profile = () => {
         </div>
         <div className="mb-2">
           <span className="text-light-brown font-bold">Program(s):</span>
-          <span className="text-brown ml-2">{user.program}</span>
+          <span className="text-brown ml-2">
+            {verifiedPrograms.length > 0 ? verifiedPrograms.join(', ') : 'No verified programs'}
+          </span>
         </div>
-        {user.university && (
-          <div className="mb-2">
-            <span className="text-light-brown font-bold">University:</span>
-            <span className="text-brown ml-2">{user.university.name}</span>
-          </div>
-        )}
         <button
           className="bg-light-brown hover:bg-light-brown-dark text-cream py-2 px-4 rounded mt-2"
           onClick={() => setIsEditFormOpen(true)}
         >
           Edit Profile
         </button>
-        <button 
+        <button
           className="bg-light-brown hover:bg-light-brown-dark text-cream py-2 px-4 rounded ml-3 mt-2"
           onClick={() => setIsUniversityFormOpen(true)}
         >
@@ -137,7 +140,7 @@ const Profile = () => {
         />
       )}
       {universities.map(university => (
-        <UniversityCard 
+        <UniversityCard
           key={university._id}
           university={university}
           onReviewClick={handleReviewClick}

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://some-laws-tickle.loca.lt/api';
+const API_BASE_URL = 'https://twenty-dodos-unite.loca.lt/api';
 
 // auth routes
 export const registerRoute = `${API_BASE_URL}/register`
@@ -13,6 +13,7 @@ export const passwordResetRoute = `${API_BASE_URL}/change-password`
 
 //universities
 export const getUniversityDetails = `${API_BASE_URL}/universities`
+export const getUniversityByIdRoute = `${API_BASE_URL}/universities`
 export const getUniversityNamesRoute = `${API_BASE_URL}/dropdown-universities`
 export const getProgramsRoute = `${API_BASE_URL}/university-programs`
 export const schoolEmailRoute = `${API_BASE_URL}/school-email`
